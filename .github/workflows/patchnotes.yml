@@ -1,0 +1,56 @@
+name: Post Patch Notes to Discord
+
+on:
+  push:
+    paths:
+      - 'PatchNotes.txt' # triggers only when this file changes
+
+jobs:
+  post-to-discord:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 2 # need previous commit to find changes
+
+      - name: Read patch notes and post to Discord
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        run: |
+          # Read the patch notes file
+          NOTES=$(cat PatchNotes.txt)
+          
+          # Get just the first line (date)
+          DATE=$(echo "$NOTES" | head -n 1)
+          
+          # Build the Discord message payload
+          python3 - <<EOF
+          import urllib.request, json, os
+
+          notes = open("PatchNotes.txt").read()
+          lines = notes.strip().split("\n")
+          date = lines[0]
+          content = "\n".join(lines[1:])
+
+          payload = {
+            "embeds": [{
+              "title": "🎣 New Update — " + date,
+              "description": content,
+              "color": 0x0078b4,
+              "footer": {
+                "text": "Fishing Game"
+              }
+            }]
+          }
+
+          data = json.dumps(payload).encode("utf-8")
+          req = urllib.request.Request(
+            os.environ["DISCORD_WEBHOOK"],
+            data=data,
+            headers={"Content-Type": "application/json"},
+            method="POST"
+          )
+          urllib.request.urlopen(req)
+          print("Posted to Discord!")
+          EOF
