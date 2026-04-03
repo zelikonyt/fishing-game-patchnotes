@@ -13,9 +13,11 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Post to Discord
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
         run: |
           python3 << 'EOF'
-          import urllib.request, json
+          import urllib.request, json, os
 
           notes = open("PatchNotes.txt").read()
           lines = notes.strip().split("\n")
@@ -24,7 +26,7 @@ jobs:
 
           payload = {
             "embeds": [{
-              "title": "Fishing Game Update - " + date,
+              "title": "🎣 Fishing Game Update - " + date,
               "description": content,
               "color": 0x0078b4,
               "footer": {"text": "Fishing Game"}
@@ -33,7 +35,7 @@ jobs:
 
           data = json.dumps(payload).encode("utf-8")
           req = urllib.request.Request(
-            "https://discord.com/api/webhooks/1489410557890003054/vnkYQbl2msbXXdlGH3cF0vaCyNQPmrueIxursk1vruHWknW0CZQ7u0L8qGqIv_mgei2R",
+            os.environ["DISCORD_WEBHOOK"],
             data=data,
             headers={"Content-Type": "application/json"},
             method="POST"
