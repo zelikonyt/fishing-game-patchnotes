@@ -3,3 +3,5 @@
 - Added in-game patch notes!
 
 - Added a loading screen!
+
+- Added the ability for when i update patch notes in github it auto pushed them to the game and discord!
