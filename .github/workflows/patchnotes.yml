@@ -8,6 +8,8 @@ on:
 jobs:
   post-to-discord:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -15,7 +17,6 @@ jobs:
       - name: Post to Discord
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           DATE=$(head -n 1 PatchNotes.txt)
           CONTENT=$(tail -n +2 PatchNotes.txt)
@@ -25,19 +26,25 @@ jobs:
             --arg desc "$CONTENT" \
             '{embeds: [{title: $title, description: $desc, color: 5016756, footer: {text: "Fishing Game"}}]}')
 
-          # Check if a last_message.txt exists with a stored message ID and date
           if [ -f last_message.txt ]; then
             LAST_ID=$(sed -n '1p' last_message.txt)
             LAST_DATE=$(sed -n '2p' last_message.txt)
 
-            # If same date, delete the old message first
+            echo "Last ID: $LAST_ID"
+            echo "Last Date: $LAST_DATE"
+            echo "Current Date: $DATE"
+
             if [ "$LAST_DATE" = "$DATE" ]; then
-              echo "Same date found, deleting old message..."
-              curl -s -X DELETE "${DISCORD_WEBHOOK}/messages/${LAST_ID}"
+              echo "Same date, deleting old message..."
+              DELETE_RESPONSE=$(curl -s -X DELETE "${DISCORD_WEBHOOK}/messages/${LAST_ID}")
+              echo "Delete response: $DELETE_RESPONSE"
+            else
+              echo "Different date, keeping old message"
             fi
+          else
+            echo "No last_message.txt found, first run"
           fi
 
-          # Post new message and capture the message ID
           echo "Posting new message..."
           RESPONSE=$(curl -s -X POST "${DISCORD_WEBHOOK}?wait=true" \
             -H "Content-Type: application/json" \
@@ -47,11 +54,9 @@ jobs:
           NEW_ID=$(echo "$RESPONSE" | jq -r '.id')
           echo "New message ID: $NEW_ID"
 
-          # Save new message ID and date to last_message.txt
           echo "$NEW_ID" > last_message.txt
           echo "$DATE" >> last_message.txt
 
-          # Commit last_message.txt back to repo
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
           git add last_message.txt
