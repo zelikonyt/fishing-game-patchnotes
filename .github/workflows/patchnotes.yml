@@ -16,32 +16,15 @@ jobs:
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
         run: |
-          python3 - "$DISCORD_WEBHOOK" << 'EOF'
-          import urllib.request, json, sys
-
-          webhook_url = sys.argv[1]
-
-          notes = open("PatchNotes.txt").read()
-          lines = notes.strip().split("\n")
-          date = lines[0]
-          content = "\n".join(lines[1:])
-
-          payload = {
-            "embeds": [{
-              "title": "🎣 Fishing Game Update - " + date,
-              "description": content,
-              "color": 0x0078b4,
-              "footer": {"text": "Fishing Game"}
-            }]
-          }
-
-          data = json.dumps(payload).encode("utf-8")
-          req = urllib.request.Request(
-            webhook_url,
-            data=data,
-            headers={"Content-Type": "application/json"},
-            method="POST"
-          )
-          response = urllib.request.urlopen(req)
-          print("Posted! Status:", response.status)
-          EOF
+          DATE=$(head -n 1 PatchNotes.txt)
+          CONTENT=$(tail -n +2 PatchNotes.txt)
+          
+          JSON=$(jq -n \
+            --arg title "🎣 Fishing Game Update - $DATE" \
+            --arg desc "$CONTENT" \
+            '{embeds: [{title: $title, description: $desc, color: 5016756, footer: {text: "Fishing Game"}}]}')
+          
+          curl -X POST "$DISCORD_WEBHOOK" \
+            -H "Content-Type: application/json" \
+            -d "$JSON" \
+            -v
