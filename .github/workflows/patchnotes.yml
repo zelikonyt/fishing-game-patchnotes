@@ -16,9 +16,10 @@ jobs:
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
         run: |
-          echo "Webhook length: ${#DISCORD_WEBHOOK}"
-          python3 << 'EOF'
-          import urllib.request, json, os
+          python3 - "$DISCORD_WEBHOOK" << 'EOF'
+          import urllib.request, json, sys
+
+          webhook_url = sys.argv[1]
 
           notes = open("PatchNotes.txt").read()
           lines = notes.strip().split("\n")
@@ -36,7 +37,7 @@ jobs:
 
           data = json.dumps(payload).encode("utf-8")
           req = urllib.request.Request(
-            os.environ["DISCORD_WEBHOOK"],
+            webhook_url,
             data=data,
             headers={"Content-Type": "application/json"},
             method="POST"
