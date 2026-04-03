@@ -20,7 +20,7 @@ jobs:
           CONTENT=$(tail -n +2 PatchNotes.txt)
           
           JSON=$(jq -n \
-            --arg title "🎣 Fishing Game Update - $DATE" \
+            --arg title "$DATE" \
             --arg desc "$CONTENT" \
             '{embeds: [{title: $title, description: $desc, color: 5016756, footer: {text: "Fishing Game"}}]}')
           
