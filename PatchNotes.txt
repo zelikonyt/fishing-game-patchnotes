@@ -1,5 +1,3 @@
 🎣 New Update — April 3rd 2026
 
 - Made boat rocking way smoother!
-
-- Added Fog and red water to El Diablo
