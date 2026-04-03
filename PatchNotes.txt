@@ -6,4 +6,4 @@
 
 - Added the ability for when i update patch notes in github it auto pushed them to the game and discord!
 
-test2
+test3
