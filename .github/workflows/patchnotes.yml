@@ -16,6 +16,7 @@ jobs:
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
         run: |
+          echo "Webhook length: ${#DISCORD_WEBHOOK}"
           python3 << 'EOF'
           import urllib.request, json, os
 
