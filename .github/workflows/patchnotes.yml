@@ -1,23 +1,7 @@
-name: Post Patch Notes to Discord
-
-on:
-  push:
-    paths:
-      - 'PatchNotes.txt'
-
-jobs:
-  post-to-discord:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Post to Discord
-        env:
-          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+- name: Post to Discord
         run: |
           python3 << 'EOF'
-          import urllib.request, json, os
+          import urllib.request, json
 
           notes = open("PatchNotes.txt").read()
           lines = notes.strip().split("\n")
@@ -29,15 +13,13 @@ jobs:
               "title": "🎣 New Update — " + date,
               "description": content,
               "color": 0x0078b4,
-              "footer": {
-                "text": "Fishing Game"
-              }
+              "footer": {"text": "Fishing Game"}
             }]
           }
 
           data = json.dumps(payload).encode("utf-8")
           req = urllib.request.Request(
-            os.environ["DISCORD_WEBHOOK"],
+            "https://discord.com/api/webhooks/1489410557890003054/vnkYQbl2msbXXdlGH3cF0vaCyNQPmrueIxursk1vruHWknW0CZQ7u0L8qGqIv_mgei2R",
             data=data,
             headers={"Content-Type": "application/json"},
             method="POST"
