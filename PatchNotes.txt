@@ -1,3 +1,5 @@
 🎣 New Update — April 3rd 2026
 
 - Made boat rocking way smoother!
+
+- Made water animation smoother!
